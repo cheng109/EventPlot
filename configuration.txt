@@ -1,0 +1,7 @@
+## configuration for eventPlot
+eventFile   /Users/juncheng/eventPlot/output.fits
+## Instrument Files Paths
+opticsFile   /Users/juncheng/work/phosim/phosim/data/deCam/optics_0.txt
+focalplaneFile  /Users/juncheng/work/phosim/phosim/data/deCam/focalplanelayout.txt
+segmentationFile /Users/juncheng/work/phosim/phosim/data/deCam/segmentation.txt
+percentage  0.2
