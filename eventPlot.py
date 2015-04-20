@@ -74,18 +74,44 @@ class Surface(object):
         self.coatingFile = line[15]
         self.mediaFile = line[16]   
     def plotSurface(self, globalZ): 
-        if(self.type=="lens"):# or self.name=="lens"): 
-            r, theta = np.mgrid[0:self.outerRadius:100j, -np.pi:np.pi:100j]
-            #x, y = np.mgrid[-10:10:100j, -10:10:100j]
+        if(self.type!="det"):# or self.name=="lens"): 
+            r, theta = np.mgrid[self.innerRadius:self.outerRadius:100j, -np.pi:np.pi:100j]
             x = r*np.cos(theta)
             y = r*np.sin(theta)
 
             r = np.sqrt(x**2 + y**2)
-            z = globalZ + r**2/(self.curvature*(1+np.sqrt(1-(1+self.conic)*r**2/(self.curvature**2))))+r**3*self.aspheric3 + r**4*self.aspheric4
-            #mlab.surf(z,warp_scale='auto')
-            mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Pastel2")
+            if self.curvature<1.0e-12:
+                z = globalZ + r*0
+            else:
+                z = globalZ + r**2/(self.curvature*(1+np.sqrt(1-(1+self.conic)*r**2/(self.curvature**2))))+r**3*self.aspheric3 + r**4*self.aspheric4
+            if self.type=="filter": 
+                mlab.mesh(x,y,z, opacity=0.3, color = (1,1,0))
+            elif self.type=="none":
+                mlab.mesh(x,y,z, opacity=0.05, color=(1,1,1))
+            else:
+                mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Pastel2")
             mlab.show()
                 
+class Chip(object): 
+        def __init__(self,line): 
+            self.name = line[0]
+            self.centerX = float(line[1])   # unit micro
+            self.centerY = float(line[2])   # unit micro
+            self.pixelSize = float(line[3])
+            self.numX = float(line[4])
+            self.numY = float(line[5])
+
+            self.halfX = self.pixelSize *self.numX/2
+            self.halfY = self.pixelSize *self.numY/2
+        def plotChip(self, pos): 
+            x, y = np.mgrid[-self.halfX:self.halfX:10j, -self.halfY:self.halfY:10j]
+            x = (x+self.centerX)/1000
+            y = (y+self.centerY)/1000
+            z= x-x+pos
+            mlab.mesh(x,y,z, opacity = 0.95, color=(0.1,0.1,0.1))
+            mlab.show()
+            
+
 
 
 def readConfig(fileName):
@@ -94,7 +120,19 @@ def readConfig(fileName):
     for line in f:
         if line[0]!='#':# and not line.strip():
             tok = line.split()
+            if len(tok)<2:
+                continue
             config[tok[0]] = tok[1]
+    if config["instrumentPath"][-1]!="/":       
+        config["instrumentPath"] += "/"
+    path = config["instrumentPath"]
+    if "opticsFile" in config:
+        config["opticsFile"] = path + config["opticsFile"] 
+    if "focalplaneFile" in config:
+        config["focalplaneFile"] = path + config["focalplaneFile"]
+    if "segmentationFile" in config:
+        config["segmentationFile"] = path + config["segmentationFile"] 
+
     return config
 
 def readEvents(config):
@@ -141,18 +179,12 @@ def readEvents(config):
     plotPhoton= int(float(per) * numPhoton)
     print plotPhoton, "out of", numPhoton
 
-    cl = ['y', 'g','r','0.3','c','m','0.8','y','k','w','burlywood','chartreuse','0.5', 'b', 'g','r','0.3','c','m','0.8','y','k','w','burlywood','chartreuse','0.5']
     for i in range(0,plotPhoton):
         length = len(photonList[i].listZ)
         if length > 8 :
-            for n in range(9,length-2):
-                #if photonList[i].listX[n+1] < 1235 :
-                #plt.plot(photonList[i].listZ[n:2+n],photonList[i].listX[n:2+n],color=cl[n-8])
-                mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(0, 0.5, 0.5),
+            for n in range(8,length-2):
+                mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(1, 0.5, 0.5),
                         opacity=0.2, tube_radius=None)
-               #print photonList[i].listZ[n:2+n]
-               #print "hello"
-    
     mlab.show()
 
 def readOptics(config): 
@@ -168,14 +200,31 @@ def readOptics(config):
     for i in range(len(surfaces)): 
         globalZ += surfaces[i].thickness
         surfaces[i].plotSurface(globalZ)
-    
+    return globalZ
+
+def readChips(config, detPosition): 
+    layoutFile = config["focalplaneFile"]
+    ampFile = config["segmentationFile"]
+    chips = []
+    for line in open(layoutFile).readlines():
+        if line[0]!="#":
+            temp = line.split()
+            chips.append(Chip(temp))
+    for i in range(len(chips)):
+        chips[i].plotChip(detPosition)  
+
 
 
 def main():
-    config = readConfig("/Users/juncheng/eventPlot/configuration.txt")
-    readEvents(config)
-    readOptics(config)
-    #test_surf()
+    configFileName = "/Users/cheng109/work/EventPlot/configuration.txt"
+    #configFileName = sys.argv[1]
+    config = readConfig(configFileName)
+    if "opticsFile" in config: 
+        detPosition = readOptics(config)
+    if "focalplaneFile" in config:
+        readChips(config,detPosition)
+    if "eventFile" in config: 
+        readEvents(config)
     
 if __name__ == "__main__":
         main()

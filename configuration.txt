@@ -1,7 +1,13 @@
-## configuration for eventPlot
-eventFile   /Users/juncheng/eventPlot/output.fits
-## Instrument Files Paths
-opticsFile   /Users/juncheng/work/phosim/phosim/data/deCam/optics_0.txt
-focalplaneFile  /Users/juncheng/work/phosim/phosim/data/deCam/focalplanelayout.txt
-segmentationFile /Users/juncheng/work/phosim/phosim/data/deCam/segmentation.txt
+##
+## Instrument plot:
+##
+instrumentPath /Users/cheng109/work/phosim/phosim/data/lsst
+opticsFile		optics_0.txt
+focalplaneFile		focalplanelayout.txt
+segmentationFile	segmentation.txt
+##
+## Event photons plot: 
+##
+eventFile   /Users/cheng109/work/EventPlot/eventFile_lsst.fits
 percentage  0.2
+
