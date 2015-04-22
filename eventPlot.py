@@ -117,12 +117,17 @@ class Chip(object):
 def readConfig(fileName):
     f = open(fileName,"r")
     config = {}
+    eventFileList = []
     for line in f:
         if line[0]!='#':# and not line.strip():
             tok = line.split()
             if len(tok)<2:
                 continue
-            config[tok[0]] = tok[1]
+            if(tok[0]=="eventFile"): 
+                eventFileList.append(tok[1])
+            else:
+                config[tok[0]] = tok[1]
+    config["eventFile"] = eventFileList
     if config["instrumentPath"][-1]!="/":       
         config["instrumentPath"] += "/"
     path = config["instrumentPath"]
@@ -135,9 +140,16 @@ def readConfig(fileName):
 
     return config
 
-def readEvents(config):
-    eventFits = config["eventFile"] #"output.fits"
-    per = config["percentage"]
+def readMultpleEvents(config): 
+    # read multiple event file
+    for eventFits in config["eventFile"]: 
+        readEvents(eventFits, config["percentage"])
+
+
+def readEvents(eventFits, per):
+    # read a single event file; 
+    #eventFits = config["eventFile"] #"output.fits"
+    #per = config["percentage"]
     f= fits.open(eventFits)
     event=f[1].data
     #print event.field
@@ -182,7 +194,7 @@ def readEvents(config):
     for i in range(0,plotPhoton):
         length = len(photonList[i].listZ)
         if length > 8 :
-            for n in range(8,length-2):
+            for n in range(8,length-4):
                 mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(1, 0.5, 0.5),
                         opacity=0.2, tube_radius=None)
     mlab.show()
@@ -216,15 +228,15 @@ def readChips(config, detPosition):
 
 
 def main():
-    configFileName = "/Users/cheng109/work/EventPlot/configuration.txt"
-    #configFileName = sys.argv[1]
+    #configFileName = "/Users/cheng109/work/EventPlot/configuration.txt"
+    configFileName = sys.argv[1]
     config = readConfig(configFileName)
     if "opticsFile" in config: 
         detPosition = readOptics(config)
     if "focalplaneFile" in config:
         readChips(config,detPosition)
     if "eventFile" in config: 
-        readEvents(config)
+        readMultpleEvents(config)
     
 if __name__ == "__main__":
         main()
