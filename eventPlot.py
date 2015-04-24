@@ -15,13 +15,10 @@ Usage: python eventFitsPlot.py eventFile.fits percentage
 Notes: 1. Plot only part of the photons with 'percentage'
 
 """
-import sys,os,commands
+import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from astropy.io import fits
-from mpl_toolkits.mplot3d import Axes3D
 from mayavi import mlab
-#from mayavi.mlab import *
 
 
 
@@ -90,7 +87,7 @@ class Surface(object):
                 mlab.mesh(x,y,z, opacity=0.05, color=(1,1,1))
             else:
                 mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Pastel2")
-            mlab.show()
+            #mlab.show()
                 
 class Chip(object): 
         def __init__(self,line): 
@@ -109,7 +106,7 @@ class Chip(object):
             y = (y+self.centerY)/1000
             z= x-x+pos
             mlab.mesh(x,y,z, opacity = 0.95, color=(0.1,0.1,0.1))
-            mlab.show()
+            #mlab.show()
             
 
 
@@ -197,7 +194,7 @@ def readEvents(eventFits, per):
             for n in range(8,length-4):
                 mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(1, 0.5, 0.5),
                         opacity=0.2, tube_radius=None)
-    mlab.show()
+    #mlab.show()
 
 def readOptics(config): 
     opticsFile = config["opticsFile"]
@@ -237,6 +234,7 @@ def main():
         readChips(config,detPosition)
     if "eventFile" in config: 
         readMultpleEvents(config)
+    mlab.show()
     
 if __name__ == "__main__":
         main()
