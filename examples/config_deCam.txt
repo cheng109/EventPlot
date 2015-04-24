@@ -1,14 +1,18 @@
 #####################
 ## Instrument plot:
 #####################
+
 instrumentPath /Users/cheng109/work/phosim/phosim/data/deCam
 opticsFile		optics_0.txt
 focalplaneFile		focalplanelayout.txt
 segmentationFile	segmentation.txt
+
+
 #####################
 ## Event photons plot: 
 #####################
-eventFile   /Users/cheng109/work/EventPlot/deCam_r_99999999_f0_1S_E000.fits
-#eventFile   /Users/cheng109/work/EventPlot/deCam_r_99999999_f0_4S_E000.fits
+
+eventFile   examples/deCam_r_99999999_f0_1S_E000.fits
+eventFile   examples/deCam_r_99999999_f0_4S_E000.fits
 percentage  0.2
 

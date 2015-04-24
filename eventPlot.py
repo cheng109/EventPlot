@@ -15,7 +15,7 @@ Usage: python eventFitsPlot.py eventFile.fits percentage
 Notes: 1. Plot only part of the photons with 'percentage'
 
 """
-import sys
+import os,sys
 import numpy as np
 from astropy.io import fits
 from mayavi import mlab
@@ -108,7 +108,11 @@ class Chip(object):
             mlab.mesh(x,y,z, opacity = 0.95, color=(0.1,0.1,0.1))
             #mlab.show()
             
-
+def updatePath(oldPath): 
+    # if it is relative path, convert to full path
+    if not os.path.exists(oldPath): 
+        newPath = os.path.join(os.path.dirname(__file__), oldPath)
+    return newPath
 
 
 def readConfig(fileName):
@@ -120,11 +124,13 @@ def readConfig(fileName):
             tok = line.split()
             if len(tok)<2:
                 continue
-            if(tok[0]=="eventFile"): 
-                eventFileList.append(tok[1])
+            if(tok[0]=="eventFile"):                 
+                eventFileList.append(updatePath(tok[1]))
             else:
                 config[tok[0]] = tok[1]
     config["eventFile"] = eventFileList
+
+
     if config["instrumentPath"][-1]!="/":       
         config["instrumentPath"] += "/"
     path = config["instrumentPath"]
