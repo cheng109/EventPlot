@@ -110,6 +110,7 @@ class Chip(object):
             
 def updatePath(oldPath): 
     # if it is relative path, convert to full path
+    newPath = oldPath
     if not os.path.exists(oldPath): 
         newPath = os.path.join(os.path.dirname(__file__), oldPath)
     return newPath
