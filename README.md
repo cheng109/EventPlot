@@ -24,7 +24,7 @@ Go to "Canopy"---->"Tools" -----> "Canopy Terminal"
 Run the examples:
 ------------------
 Two examples are included in the examples directory: LSST and DES. 
-Before you run the examples, you should specify "instrumentPath" and "eventFile" location the configure files. 
+Before you run the examples, you should specify "instrumentPath" and "eventFile" location in the configure files. 
 
 For LSST:  
 > python eventPlot.py examples/config_lsst.txt
