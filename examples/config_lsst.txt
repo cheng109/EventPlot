@@ -13,5 +13,5 @@ segmentationFile	segmentation.txt
 #####################
 
 eventFile   examples/lsst_r_99999999_f0_R22_S11_E000.fits
-percentage  0.1
+percentage  0.4
 
