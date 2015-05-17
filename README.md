@@ -32,6 +32,15 @@ For LSST:
 For DES: 
 > python eventPlot.py examples/config_deCam.txt
 
+---------------------------------
+Using the latest stable version
+---------------------------------
+> git clone https://github.com/cheng109/EventPlot.git
+
+> git tag -l
+
+> git checkout tags/v1.1
+
 
 
 
