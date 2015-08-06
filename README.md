@@ -1,4 +1,4 @@
-# EventPlot
+# PhoSimVisualizer
 [PhoSim] Plot instruments and photon raytrace
 
 --------------
@@ -35,7 +35,7 @@ For DES:
 ---------------------------------
 Using the latest stable version
 ---------------------------------
-> git clone https://github.com/cheng109/EventPlot.git
+> git clone https://github.com/cheng109/PhoSimVisualizer.git
 
 > git tag -l
 
