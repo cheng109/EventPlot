@@ -233,6 +233,7 @@ def readChips(config, detPosition):
 
 def main():
     #configFileName = "/Users/cheng109/work/EventPlot/configuration.txt"
+    detPosition = 0 
     configFileName = sys.argv[1]
     config = readConfig(configFileName)
     if "opticsFile" in config: 
