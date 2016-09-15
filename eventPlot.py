@@ -20,7 +20,12 @@ import numpy as np
 from astropy.io import fits
 from mayavi import mlab
 
-
+def EulerRotation(phi,psi,theta): 
+    phi, psi, theta = np.deg2rad(phi), np.deg2rad(psi), np.deg2rad(theta)
+    matrixD = np.matrix([[np.cos(phi), np.sin(phi), 0], [-np.sin(phi), np.cos(phi), 0], [0, 0, 1]])
+    matrixC = np.matrix([[1, 0, 0], [0, np.cos(theta), np.sin(theta)], [0, -np.sin(theta), np.cos(theta)]])
+    matrixB = np.matrix([[np.cos(psi), np.sin(psi), 0], [-np.sin(psi), np.cos(psi), 0], [0, 0, 1]])   
+    return matrixB * matrixC * matrixD
 
 class photon(object):
     def  __init__(self):
@@ -86,26 +91,47 @@ class Surface(object):
             elif self.type=="none":
                 mlab.mesh(x,y,z, opacity=0.05, color=(1,1,1))
             else:
-                mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Pastel2")
+                mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Accent")
             #mlab.show()
                 
 class Chip(object): 
         def __init__(self,line): 
             self.name = line[0]
-            self.centerX = float(line[1])   # unit micro
-            self.centerY = float(line[2])   # unit micro
+            self.centerX   = float(line[1])   # unit micro
+            self.centerY   = float(line[2])   # unit micro
             self.pixelSize = float(line[3])
-            self.numX = float(line[4])
-            self.numY = float(line[5])
+            self.numX      = float(line[4])
+            self.numY      = float(line[5])
 
-            self.halfX = self.pixelSize *self.numX/2
-            self.halfY = self.pixelSize *self.numY/2
+            self.phi       = float(line[10])
+            self.psi       = float(line[11]) 
+            self.theta     = float(line[12])
+            
+            self.shiftX    = float(line[13])
+            self.shiftY    = float(line[14])
+            self.shiftZ    = float(line[15])
+
+
+            self.halfX     = self.pixelSize *self.numX/2
+            self.halfY     = self.pixelSize *self.numY/2
         def plotChip(self, pos): 
             x, y = np.mgrid[-self.halfX:self.halfX:10j, -self.halfY:self.halfY:10j]
-            x = (x+self.centerX)/1000
-            y = (y+self.centerY)/1000
-            z= x-x+pos
-            mlab.mesh(x,y,z, opacity = 0.95, color=(0.1,0.1,0.1))
+            z = x-x
+           
+            new_x, new_y, new_z = x, y, z
+            M = EulerRotation(self.phi, self.psi, self.theta)
+            
+            for i in range(x.shape[0]): 
+                for j in range(x.shape[1]): 
+                    result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
+                    new_x[i][j], new_y[i][j], new_z[i][j] = result[0][0], result[1][0], result[2][0] 
+                    
+                   
+            x = (new_x+self.centerX)/1000 + self.shiftX  # unit mm 
+            y = (new_y+self.centerY)/1000 + self.shiftY  # unit mm 
+            z=   new_z+pos + self.shiftZ
+            
+            mlab.mesh(x,y,z, opacity = 1.0, color=(0.3,0.3,0.3))
             #mlab.show()
             
 def updatePath(oldPath): 
@@ -198,7 +224,7 @@ def readEvents(eventFits, per):
     for i in range(0,plotPhoton):
         length = len(photonList[i].listZ)
         if length > 8 :
-            for n in range(8,length-4):
+            for n in range(8,length):
                 mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(1, 0.5, 0.5),
                         opacity=0.2, tube_radius=None)
     #mlab.show()
@@ -236,13 +262,15 @@ def main():
     detPosition = 0 
     configFileName = sys.argv[1]
     config = readConfig(configFileName)
+    mlab.figure(bgcolor=(0.5,0.3,0.8))
     if "opticsFile" in config: 
         detPosition = readOptics(config)
     if "focalplaneFile" in config:
         readChips(config,detPosition)
     if "eventFile" in config: 
         readMultpleEvents(config)
+    
     mlab.show()
     
 if __name__ == "__main__":
-        main()
+    main()
