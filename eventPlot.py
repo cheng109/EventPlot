@@ -93,16 +93,36 @@ class Surface(object):
             else:
                 mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Accent")
             #mlab.show()
-                
+
+# def plotBox(x, y, z, dz): 
+    
+#     #mlab.mesh(x,z, y, opacity = 0.8, color=(0.3,0.3,0.3)); 
+    # plot side 1; 
+   
+
+# def performRotationTranformation(x, y, z, phi, psi, theta, halfX, halfY, deltaZ):
+#     M =  EulerRotation(phi, psi, theta)
+#     new_x, new_y, new_z = x, y, z   
+
+#     for i in range(x.shape[0]): 
+#         for j in range(x.shape[1]): 
+#             result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
+#             new_x[i][j], new_y[i][j], new_z[i][j] = result[0][0], result[1][0], result[2][0]                   
+#             x = (new_x+centerX)/1000 + shiftX     # unit mm 
+#             y = (new_y+centerY)/1000 + shiftY     # unit mm 
+#             z =   new_z+deltaZ + self.shiftZ + self.deltaZ/1000 # unit mm
+#     return x, y, z
+
+             
 class Chip(object): 
         def __init__(self,line): 
             self.name = line[0]
-            self.centerX   = float(line[1])   # unit micro
-            self.centerY   = float(line[2])   # unit micro
+            self.centerX   = float(line[1])   # unit micron
+            self.centerY   = float(line[2])   # unit micron
             self.pixelSize = float(line[3])
             self.numX      = float(line[4])
             self.numY      = float(line[5])
-
+            self.thickness = float(line[8])    # unit micron
             self.phi       = float(line[10])
             self.psi       = float(line[11]) 
             self.theta     = float(line[12])
@@ -111,27 +131,64 @@ class Chip(object):
             self.shiftY    = float(line[14])
             self.shiftZ    = float(line[15])
 
+            self.deltaZ    = float(line[17])  # for wavefront sensor delta z shift
 
             self.halfX     = self.pixelSize *self.numX/2
             self.halfY     = self.pixelSize *self.numY/2
+            self.halfZ     = self.thickness/2
+
+            self.centerZ   = 0
+
         def plotChip(self, pos): 
+            M = EulerRotation(self.phi, self.psi, self.theta)
+            self.centerZ   = 1000*pos + self.thickness/2   # unit micron
+            opacity = 1.0
+            color = (0.3,0.3,0.3)
+            ###############  Group1  ###############
             x, y = np.mgrid[-self.halfX:self.halfX:10j, -self.halfY:self.halfY:10j]
             z = x-x
-           
-            new_x, new_y, new_z = x, y, z
-            M = EulerRotation(self.phi, self.psi, self.theta)
-            
+            tempX, tempY, tempZ = x, y, z   
             for i in range(x.shape[0]): 
                 for j in range(x.shape[1]): 
                     result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
-                    new_x[i][j], new_y[i][j], new_z[i][j] = result[0][0], result[1][0], result[2][0] 
-                    
-                   
-            x = (new_x+self.centerX)/1000 + self.shiftX  # unit mm 
-            y = (new_y+self.centerY)/1000 + self.shiftY  # unit mm 
-            z=   new_z+pos + self.shiftZ
-            
-            mlab.mesh(x,y,z, opacity = 1.0, color=(0.3,0.3,0.3))
+                    tempX[i][j], tempY[i][j], tempZ[i][j] = result[0][0], result[1][0], result[2][0]                   
+            x = (tempX+self.centerX)/1000 + self.shiftX     # unit mm 
+            y = (tempY+self.centerY)/1000 + self.shiftY     # unit mm 
+            z = (tempZ+self.centerZ)/1000 + self.shiftZ + self.deltaZ/1000 # unit mm
+            mlab.mesh(x,y, z-self.halfZ/1000, opacity = opacity, color=color); 
+            mlab.mesh(x,y, z+self.halfZ/1000, opacity = opacity, color=color); 
+
+            ###############  Group2  ###############
+            x, z = np.mgrid[-self.halfX:self.halfX:10j, -self.halfZ:self.halfZ:10j]
+            y = x-x
+            tempX, tempY, tempZ = x, y, z   
+            for i in range(x.shape[0]): 
+                for j in range(x.shape[1]): 
+                    result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
+                    tempX[i][j], tempY[i][j], tempZ[i][j] = result[0][0], result[1][0], result[2][0]                   
+            x = (tempX+self.centerX)/1000 + self.shiftX     # unit mm 
+            z = (tempZ+self.centerZ)/1000 + self.shiftZ + self.deltaZ/1000    # unit mm 
+            y = (tempY+self.centerY)/1000 + self.shiftY  # unit mm
+            mlab.mesh(x,y-self.halfY/1000, z, opacity = opacity, color=color); 
+            mlab.mesh(x,y+self.halfY/1000, z, opacity = opacity, color=color); 
+
+            ###############  Group3  ###############
+            y, z = np.mgrid[-self.halfY:self.halfY:10j, -self.halfZ:self.halfZ:10j]
+            x = y-y
+            tempX, tempY, tempZ = x, y, z   
+            for i in range(x.shape[0]): 
+                for j in range(x.shape[1]): 
+                    result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
+                    tempX[i][j], tempY[i][j], tempZ[i][j] = result[0][0], result[1][0], result[2][0]                   
+            x = (tempX+self.centerX)/1000 + self.shiftX     # unit mm 
+            z = (tempZ+self.centerZ)/1000 + self.shiftZ + self.deltaZ/1000    # unit mm 
+            y = (tempY+self.centerY)/1000 + self.shiftY  # unit mm
+            mlab.mesh(x-self.halfX/1000,y, z, opacity = opacity, color=color); 
+            mlab.mesh(x+self.halfX/1000,y, z, opacity = opacity, color=color); 
+
+
+
+            #mlab.mesh(x,y,z, opacity = 1.0, color=(0.3,0.3,0.3))
             #mlab.show()
             
 def updatePath(oldPath): 
