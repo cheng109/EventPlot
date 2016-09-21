@@ -154,7 +154,7 @@ class Chip(object):
                     tempX[i][j], tempY[i][j], tempZ[i][j] = result[0][0], result[1][0], result[2][0]                   
             x = (tempX+self.centerX)/1000 + self.shiftX     # unit mm 
             y = (tempY+self.centerY)/1000 + self.shiftY     # unit mm 
-            z = (tempZ+self.centerZ)/1000 + self.shiftZ + self.deltaZ/1000 # unit mm
+            z = (tempZ+self.centerZ)/1000 + self.shiftZ - self.deltaZ/1000 # unit mm
             mlab.mesh(x,y, z-self.halfZ/1000, opacity = opacity, color=color); 
             mlab.mesh(x,y, z+self.halfZ/1000, opacity = opacity, color=color); 
 
@@ -167,7 +167,7 @@ class Chip(object):
                     result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
                     tempX[i][j], tempY[i][j], tempZ[i][j] = result[0][0], result[1][0], result[2][0]                   
             x = (tempX+self.centerX)/1000 + self.shiftX     # unit mm 
-            z = (tempZ+self.centerZ)/1000 + self.shiftZ + self.deltaZ/1000    # unit mm 
+            z = (tempZ+self.centerZ)/1000 + self.shiftZ - self.deltaZ/1000    # unit mm 
             y = (tempY+self.centerY)/1000 + self.shiftY  # unit mm
             mlab.mesh(x,y-self.halfY/1000, z, opacity = opacity, color=color); 
             mlab.mesh(x,y+self.halfY/1000, z, opacity = opacity, color=color); 
@@ -181,7 +181,7 @@ class Chip(object):
                     result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
                     tempX[i][j], tempY[i][j], tempZ[i][j] = result[0][0], result[1][0], result[2][0]                   
             x = (tempX+self.centerX)/1000 + self.shiftX     # unit mm 
-            z = (tempZ+self.centerZ)/1000 + self.shiftZ + self.deltaZ/1000    # unit mm 
+            z = (tempZ+self.centerZ)/1000 + self.shiftZ - self.deltaZ/1000    # unit mm 
             y = (tempY+self.centerY)/1000 + self.shiftY  # unit mm
             mlab.mesh(x-self.halfX/1000,y, z, opacity = opacity, color=color); 
             mlab.mesh(x+self.halfX/1000,y, z, opacity = opacity, color=color); 
