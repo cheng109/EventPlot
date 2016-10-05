@@ -94,26 +94,7 @@ class Surface(object):
                 mlab.mesh(x,y,z, opacity=1.0, color=(0.9,0.9,0.9), colormap="Accent")
             #mlab.show()
 
-# def plotBox(x, y, z, dz): 
-    
-#     #mlab.mesh(x,z, y, opacity = 0.8, color=(0.3,0.3,0.3)); 
-    # plot side 1; 
-   
 
-# def performRotationTranformation(x, y, z, phi, psi, theta, halfX, halfY, deltaZ):
-#     M =  EulerRotation(phi, psi, theta)
-#     new_x, new_y, new_z = x, y, z   
-
-#     for i in range(x.shape[0]): 
-#         for j in range(x.shape[1]): 
-#             result = M * np.matrix([[x[i][j]], [y[i][j]], [z[i][j]]])
-#             new_x[i][j], new_y[i][j], new_z[i][j] = result[0][0], result[1][0], result[2][0]                   
-#             x = (new_x+centerX)/1000 + shiftX     # unit mm 
-#             y = (new_y+centerY)/1000 + shiftY     # unit mm 
-#             z =   new_z+deltaZ + self.shiftZ + self.deltaZ/1000 # unit mm
-#     return x, y, z
-
-             
 class Chip(object): 
         def __init__(self,line): 
             self.name = line[0]
@@ -131,7 +112,7 @@ class Chip(object):
             self.shiftY    = float(line[14])
             self.shiftZ    = float(line[15])
 
-            self.deltaZ    = float(line[17])  # for wavefront sensor delta z shift
+            self.deltaZ    = -float(line[17])  # for wavefront sensor delta z shift
 
             self.halfX     = self.pixelSize *self.numX/2
             self.halfY     = self.pixelSize *self.numY/2
@@ -280,9 +261,10 @@ def readEvents(eventFits, per):
 
     for i in range(0,plotPhoton):
         length = len(photonList[i].listZ)
-        if length > 8 :
-            for n in range(8,length):
-                mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(1, 0.5, 0.5),
+        if length > 13 : 
+            for n in range(13,length-1):
+                if photonList[i].listLayer[n+1]< 300:
+                    mlab.plot3d(photonList[i].listX[n:2+n], photonList[i].listY[n:2+n],photonList[i].listZ[n:2+n],color=(1, 0.5, 0.5),
                         opacity=0.2, tube_radius=None)
     #mlab.show()
 
