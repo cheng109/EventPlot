@@ -1,4 +1,4 @@
-# PhoSimVisualizer
+# phosim_visualizer
 [PhoSim] Plot instruments and photon raytrace
 
 --------------
